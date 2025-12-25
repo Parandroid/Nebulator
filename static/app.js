@@ -17,6 +17,17 @@ let globalMaxGrayValue;
 let applyBtn;
 let exportBtn;
 
+// Popup elements
+let imagePopup;
+let popupOverlay;
+let popupContent;
+let popupImage;
+let popupImageContainer;
+let popupFilename;
+let popupClose;
+let popupBgColor;
+let popupBgColorText;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize DOM elements
@@ -29,6 +40,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     globalMaxGrayValue = document.getElementById('global-max-gray-value');
     applyBtn = document.getElementById('apply-btn');
     exportBtn = document.getElementById('export-btn');
+    
+    // Initialize popup elements
+    imagePopup = document.getElementById('image-popup');
+    popupOverlay = imagePopup?.querySelector('.popup-overlay');
+    popupContent = imagePopup?.querySelector('.popup-content');
+    popupImage = document.getElementById('popup-image');
+    popupImageContainer = document.getElementById('popup-image-container');
+    popupFilename = document.getElementById('popup-filename');
+    popupClose = document.getElementById('popup-close');
+    popupBgColor = document.getElementById('popup-bg-color');
+    popupBgColorText = document.getElementById('popup-bg-color-text');
     
     // Check if all required elements exist
     if (!loadingEl) console.error('loadingEl not found');
@@ -50,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadGlobalSettings();
     await loadImages();
     setupEventListeners();
+    setupPopupListeners();
 });
 
 // Load global settings from server
@@ -224,6 +247,11 @@ function setupCardEventListeners(card, filename) {
         console.error(`Missing elements in card for ${filename} - skipping event listeners`);
         return;
     }
+    
+    // Add click handler to open popup
+    previewImg.addEventListener('click', () => {
+        openImagePopup(filename, previewImg.src);
+    });
     
     // Toggle override
     checkbox.addEventListener('change', async (e) => {
@@ -485,5 +513,143 @@ async function handleExport() {
         exportBtn.disabled = false;
         exportBtn.textContent = 'Export All Images';
     }
+}
+
+// Open image popup
+async function openImagePopup(filename, imageSrc) {
+    if (!imagePopup || !popupImage || !popupImageContainer || !popupFilename) {
+        console.error('Popup elements not found');
+        return;
+    }
+    
+    // Set filename
+    popupFilename.textContent = filename;
+    
+    // Create a new image to get dimensions
+    const img = new Image();
+    img.onload = () => {
+        // Set image source
+        popupImage.src = imageSrc;
+        
+        // Size popup to image (with some padding for controls)
+        const padding = 100; // Space for header and controls
+        const maxWidth = window.innerWidth * 0.95;
+        const maxHeight = window.innerHeight * 0.95;
+        
+        let popupWidth = img.naturalWidth + 40; // Image width + padding
+        let popupHeight = img.naturalHeight + padding; // Image height + header/controls
+        
+        // Constrain to viewport
+        if (popupWidth > maxWidth) {
+            const scale = maxWidth / popupWidth;
+            popupWidth = maxWidth;
+            popupHeight = popupHeight * scale;
+        }
+        if (popupHeight > maxHeight) {
+            const scale = maxHeight / popupHeight;
+            popupHeight = maxHeight;
+            popupWidth = popupWidth * scale;
+        }
+        
+        // Set popup content size
+        if (popupContent) {
+            popupContent.style.width = `${popupWidth}px`;
+            popupContent.style.maxHeight = `${maxHeight}px`;
+        }
+        
+        // Show popup
+        imagePopup.style.display = 'flex';
+        
+        // Initialize background color
+        if (popupBgColor && popupBgColorText) {
+            const currentBg = popupImageContainer.style.backgroundColor || '#000000';
+            popupBgColor.value = currentBg;
+            popupBgColorText.value = currentBg;
+            updatePopupBackground(currentBg);
+        }
+    };
+    
+    img.onerror = () => {
+        console.error('Failed to load image for popup');
+    };
+    
+    img.src = imageSrc;
+}
+
+// Close image popup
+function closeImagePopup() {
+    if (imagePopup) {
+        imagePopup.style.display = 'none';
+    }
+}
+
+// Update popup background color
+function updatePopupBackground(color) {
+    if (popupImageContainer) {
+        popupImageContainer.style.backgroundColor = color;
+    }
+}
+
+// Setup popup event listeners
+function setupPopupListeners() {
+    if (!popupClose || !popupOverlay || !popupBgColor || !popupBgColorText) {
+        return;
+    }
+    
+    // Close button
+    popupClose.addEventListener('click', closeImagePopup);
+    
+    // Close on overlay click
+    popupOverlay.addEventListener('click', closeImagePopup);
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && imagePopup && imagePopup.style.display !== 'none') {
+            closeImagePopup();
+        }
+    });
+    
+    // Background color picker
+    popupBgColor.addEventListener('input', (e) => {
+        const color = e.target.value;
+        if (popupBgColorText) {
+            popupBgColorText.value = color;
+        }
+        updatePopupBackground(color);
+    });
+    
+    // Background color text input
+    popupBgColorText.addEventListener('input', (e) => {
+        const color = e.target.value;
+        // Validate hex color
+        if (/^#[0-9A-F]{6}$/i.test(color)) {
+            if (popupBgColor) {
+                popupBgColor.value = color;
+            }
+            updatePopupBackground(color);
+        }
+    });
+    
+    // Sync color picker when text changes (on blur)
+    popupBgColorText.addEventListener('blur', (e) => {
+        let color = e.target.value;
+        // Add # if missing
+        if (!color.startsWith('#')) {
+            color = '#' + color;
+        }
+        // Validate and update
+        if (/^#[0-9A-F]{6}$/i.test(color)) {
+            e.target.value = color;
+            if (popupBgColor) {
+                popupBgColor.value = color;
+            }
+            updatePopupBackground(color);
+        } else {
+            // Reset to current color if invalid
+            if (popupBgColor) {
+                e.target.value = popupBgColor.value;
+            }
+        }
+    });
 }
 

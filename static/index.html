@@ -44,6 +44,29 @@
         </main>
     </div>
     
+    <!-- Image Preview Popup -->
+    <div id="image-popup" class="image-popup" style="display: none;">
+        <div class="popup-overlay"></div>
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="popup-filename"></h3>
+                <button id="popup-close" class="popup-close">&times;</button>
+            </div>
+            <div class="popup-body">
+                <div class="popup-image-container" id="popup-image-container">
+                    <img id="popup-image" class="popup-image" alt="Preview">
+                </div>
+                <div class="popup-controls">
+                    <label for="popup-bg-color">Background Color:</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="popup-bg-color" value="#000000" class="color-picker">
+                        <input type="text" id="popup-bg-color-text" value="#000000" class="color-text" placeholder="#000000">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="/static/app.js"></script>
 </body>
 </html>
