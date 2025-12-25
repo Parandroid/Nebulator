@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebulator - Nebula Sprite Transparency Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Nebulator</h1>
+            <p class="subtitle">Nebula Sprite Transparency Generator</p>
+            
+            <div class="global-controls">
+                <div class="control-group">
+                    <label for="global-min-gray">Min Gray (Transparent):</label>
+                    <div class="slider-container">
+                        <input type="range" id="global-min-gray" min="0" max="255" value="0" class="slider">
+                        <span class="slider-value" id="global-min-gray-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="global-max-gray">Max Gray (Opaque):</label>
+                    <div class="slider-container">
+                        <input type="range" id="global-max-gray" min="0" max="255" value="255" class="slider">
+                        <span class="slider-value" id="global-max-gray-value">255</span>
+                    </div>
+                </div>
+                
+                <button id="apply-btn" class="apply-btn">Apply Settings</button>
+                <button id="export-btn" class="export-btn">Export All Images</button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div id="loading" class="loading">Loading images...</div>
+            <div id="image-grid" class="image-grid"></div>
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <p>No images found in the input folder.</p>
+                <p class="hint">Place PNG or JPG images in the <code>input/</code> folder.</p>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
+
