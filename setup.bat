@@ -21,3 +21,4 @@ if errorlevel 1 (
 
 echo Setup complete! Run 'run.bat' to start the application.
 
+
